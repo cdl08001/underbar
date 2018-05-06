@@ -5,14 +5,15 @@
 
     describe('identity', function() {
       checkForNativeMethods(function() {
-        _.identity(1);
+        _.identity();
       });
 
       it('should return whatever value is passed into it', function() {
         var uniqueObject = {};
+
         expect(_.identity(1)).to.equal(1);
         expect(_.identity('string')).to.equal('string');
-        expect(_.identity(false)).to.be.false;
+        expect(_.identity(false)).to.equal(false);
         expect(_.identity(uniqueObject)).to.equal(uniqueObject);
       });
     });
@@ -346,7 +347,7 @@
         var iterator = function(value) { return value === 1; };
         var numbers = [1, 2, 2, 3, 4, 4];
 
-        expect(_.uniq(FILL_ME_IN)).to.eql([1, 2]);
+        expect(_.uniq(numbers, true)).to.eql([1, 2, 3, 4]);
       });
 
       it('should produce a brand new array instead of modifying the input array', function() {
