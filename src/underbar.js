@@ -189,27 +189,148 @@
   };
 
   // Determine if the array or object contains a given value (using `===`).
+  // var object = { a: 1, b: 2, c: 3 };
+  // var value = 1;
+  // expect(_.contains(object, value)).to.be.true;
+
   _.contains = function(collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
-    return _.reduce(collection, function(wasFound, item) {
-      if (wasFound) {
-        return true;
+    if(collection[0] !== undefined){
+      return _.reduce(collection, function(wasFound, item) {
+        if (wasFound) {
+          return true;
+        }
+        return item === target;
+      }, false);
+    } else {
+      var values = Object.values(collection);
+      for(var i = 0; i < values.length; i++){
+        if(values[i] === target){
+          return true;
+        } 
+
       }
-      return item === target;
-    }, false);
+      return false; 
+    }
   };
 
 
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
-    // TIP: Try re-using reduce() here.
+    // Empty collection = true
+    // All true = true
+    // All false = false
+    // true or false = false
+    // if value is undefined = false
+    // should handle results that manipulate input
+    // should work when no callback provided
+
+    var theTruth = {
+      T: 0,
+      F: 0
+    };
+
+    if(collection.length === 0){
+      return true;
+    } else if(iterator === undefined){
+      for(var i = 0; i < collection.length; i++){
+        if(collection[i] === undefined){
+          return false;
+        } else if(collection[i]){
+            theTruth.T++;
+        } else {
+            theTruth.F++;
+        }
+      }
+      if(theTruth.F === 0){
+        return true;
+      } else if(theTruth.T === 0){
+          return false;
+      } else if(theTruth.F > 0 && theTruth.T > 0){
+          return false;
+      } 
+    } else {
+        var newCollection = [];
+        for(var x = 0; x < collection.length; x++){
+          newCollection.push(iterator(collection[x]))
+        if(newCollection[x] === undefined){
+          return false;
+        } else if(newCollection[x]){
+            theTruth.T++;
+        } else {
+            theTruth.F++;
+        }
+      }
+
+      if(theTruth.F === 0){
+        return true;
+      } else if(theTruth.T === 0){
+          return false;
+      } else if(theTruth.F > 0 && theTruth.T > 0){
+          return false;
+      }     
+    }      
   };
+
+
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
-    // TIP: There's a very clever way to re-use every() here.
+
+    // Empty collection = FALSE
+    // All true = TRUE
+    // All false = FALSE
+    // All true\false = TRUE
+    // 'yes' = TRUE
+    // if iterator(collection[0]) == false, FALSE
+    // should work with no callback
+    var theTruth = {
+      T: 0,
+      F: 0
+    };
+
+    if(collection.length === 0){
+      return false;
+    } else if(iterator === undefined){
+      for(var i = 0; i < collection.length; i++){
+        if(collection[i] === undefined){
+          return false;
+        } else if(collection[i]){
+            theTruth.T++;
+        } else {
+            theTruth.F++;
+        }
+      }
+      if(theTruth.F === 0){
+        return true;
+      } else if(theTruth.T === 0){
+          return false;
+      } else if(theTruth.F > 0 && theTruth.T > 0){
+          return true;
+      } 
+    } else {
+        var newCollection = [];
+        for(var x = 0; x < collection.length; x++){
+          newCollection.push(iterator(collection[x]))
+        if(newCollection[x] === undefined){
+          return false;
+        } else if(newCollection[x]){
+            theTruth.T++;
+        } else {
+            theTruth.F++;
+        }
+      }
+
+      if(theTruth.F === 0){
+        return true;
+      } else if(theTruth.T === 0){
+          return false;
+      } else if(theTruth.F > 0 && theTruth.T > 0){
+          return true;
+      }     
+    } 
   };
 
 
@@ -232,12 +353,35 @@
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+    var arg = arguments;
+    
+    for(var i = 0; i < arg.length; i++){
+      var objKeys = Object.keys(arg[i])
+      var objValue = Object.values(arg[i])
+      for(var k = 0; k < objKeys.length; k++){
+        arg[0][objKeys[k]] = objValue[k];
+      }
+    }
+    return arg[0];    
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
-  };
+    var arg = arguments;
+    
+    for(var i = 0; i < arg.length; i++){
+      var objKeys = Object.keys(arg[i])
+      var objValue = Object.values(arg[i])
+      for(var k = 0; k < objKeys.length; k++){
+        if(arg[0][objKeys[k]] === undefined){
+          arg[0][objKeys[k]] = objValue[k];
+        }
+      }
+    }
+    return arg[0];    
+};
+  
 
 
   /**
@@ -280,6 +424,18 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+    // should produce the same result as non-memoized version
+    var results = {};
+    return function() {
+      var args = Array.prototype.slice.call(arguments);
+      var key = JSON.stringify(args);
+
+      if(!(key in results)) {
+        results[key] = func.apply(this, args);
+      }
+
+      return results[key];
+    }
   };
 
   // Delays a function for the given number of milliseconds, and then calls
@@ -289,8 +445,9 @@
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
-  };
+  
 
+};
 
   /**
    * ADVANCED COLLECTION OPERATIONS
