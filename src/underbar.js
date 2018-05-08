@@ -447,18 +447,18 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {
+  _.delay = function(func, wait, a, b) {
+    
+    var passIn = function(a, b){
+      if(a === undefined || b === undefined){
+        return func;
+      } else {
+        var toRun = func.apply(this, arguments);
+        return toRun;
+      }
 
-    var passIn = func;
-
-      //var argList = Array.prototype.slice.call(arguments);
-      //if(argList.length === 1){
-      //  return func(argList[0]);
-      //} else {
-      //  return func(argList[0], argList[1]);
-      //}
-
-
+    }
+    return setTimeout(passIn(a, b), wait);
 };
 
   /**
@@ -472,6 +472,33 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+    
+    var currentArray = [];
+    for(var x = 0; x < array.length; x++){
+      currentArray.push(array[x]);
+    }
+
+    var resultsArray = [];
+    var indexArray = [];
+
+    function getRandomInt(max){
+      return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    while(indexArray.length < currentArray.length){
+      var testIndex = getRandomInt(currentArray.length);
+      if(indexArray.includes(testIndex)){
+        //do nothing
+      } else {
+        indexArray.push(testIndex);
+      }
+    }
+    
+    for(var i = 0; i < indexArray.length; i++){
+      resultsArray.push(currentArray[indexArray[i]]);
+    }
+
+    return resultsArray;
   };
 
 
